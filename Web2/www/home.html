@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+
+<head>
+  <title>Speech Translator</title>
+  <script src="https://kit.fontawesome.com/72f4710995.js" crossorigin="anonymous"></script>
+  <style>
+    .Row {
+      display: table-row;
+      width: fit-content;
+    }
+
+    .Cell {
+      display: table-cell;
+      border: solid goldenrod;
+      border-width: 1px;
+      padding-left: 5px;
+      padding-right: 5px;
+      align-self: auto;
+      width: auto;
+    }
+
+    .dropbtn {
+      background-color: #04AA6D;
+      color: white;
+      padding: 16px;
+      font-size: 16px;
+      border: none;
+    }
+
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #f1f1f1;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+      z-index: 1;
+    }
+
+    .dropdown-content a {
+      color: black;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+    }
+
+    .dropdown-content a:hover {
+      background-color: #ddd;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
+    .dropdown:hover .dropbtn {
+      background-color: #3e8e41;
+    }
+
+  </style>
+</head>
+
+<body ng-controller="DonationCtrl">
+  <h1>Speech synthesiser</h1>
+
+  <p>
+    Enter some text in the input below and press return or the "play" button
+    to hear it. change voices using the dropdown menu.
+  </p>
+
+
+  <form name="myForm" autocomplete="on" novalidate>
+    <h2>Enter Text</h2>
+    <div class="vl"></div>
+    <p>
+      <input type="text" name="inputText" class="form-control input-md" ng-model="inputText" placeholder="Enter Text" value="" ng-required="true">
+      <p class="isa_error" ng-show="myForm.inputText.$dirty && myForm.inputText.$invalid"></p>
+    </p>
+
+    <button type="button" class="btn btn-success btn-xl" ng-click="Speak(language, inputText); spinner=true;" ng-disabled="myForm.inputText.$invalid">Speak It</button>
+    <br>
+  </form>
+  <h2>Select Source Language</h2>
+  <p>
+    <select class="form-control" id="srcLang" name="srcLang" ng-model="srcLang">
+      <option value="" selected disabled>Select Source Language</option>
+      <option value="en-US">English</option>
+      <option value="bn-IN">Bengali</option>
+      <option value="hi-IN">Hindi</option>
+      <option value="th-TH">Thai</option>
+    </select>
+  </p>
+  <h2>Select Target Language</h2>
+  <p>
+    <select class="form-control" id="targetLang" name="targetLang" ng-model="targetLang">
+      <option value="" selected disabled>Select Target Language</option>
+      <option value="en-US">English</option>
+      <option value="bn-IN">Bengali</option>
+      <option value="hi-IN">Hindi</option>
+      <option value="th-TH">Thai</option>
+      <option value="fr-FR">French</option>
+      <option value="zh-CH">Chinese</option>
+      <option value="es">Spanish</option>
+      <option value="de">German</option>
+      <option value="ru">Russian</option>
+      <option value="gu">Gujrati</option>
+      <option value="it">Italian</option>
+      <option value="ja">Japanese</option>
+    </select>
+  </p>
+  <button type="button" class="btn btn-success btn-xl" ng-click="SpeechToText(srcLang, targetLang); spinner=true;">Convert Speech</button>
+  <br>
+  <select class="form-control" id="chatWith" name="chatWith" ng-model="chatWith">
+    <option ng-repeat="row in loggedinUsers" ng-value="row._id">{{row.name}}</option>
+  </select>
+</body>
+
+</html>
