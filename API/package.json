@@ -1,10 +1,10 @@
 {
-  "name": "donation-api",
+  "name": "speech-translation-api",
   "version": "0.0.0",
-  "description": "FreeCycle App",
+  "description": "Speech Translation App",
   "main": "donation.js",
   "scripts": {
-    "start": "node donation.js"
+    "start": "node speech-translation.js"
   },
   "dependencies": {
     "bcrypt": "5.0.1",

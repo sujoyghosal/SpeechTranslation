@@ -1,1 +1,1 @@
-docker run -p 49155:5555 -d sujoyghosal/donation-api
+docker run -p 49155:5555 -d sujoyghosal/speech-translation-api

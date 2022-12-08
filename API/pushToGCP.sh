@@ -1,1 +1,1 @@
-gcloud run deploy donation-api --source .
+gcloud run deploy speech-translation-api --source .
