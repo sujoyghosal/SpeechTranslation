@@ -1,5 +1,5 @@
 {
-  "name": "TranslateWeb",
+  "name": "translateweb",
   "version": "0.0.0",
   "description": "Speech Translation Web App",
   "main": "TranslateWeb.js",

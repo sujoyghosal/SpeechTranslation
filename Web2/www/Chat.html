@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+
+<head>
+  <title>Speech Translator</title>
+  <script src="https://kit.fontawesome.com/72f4710995.js" crossorigin="anonymous"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    /* Create two unequal columns that floats next to each other */
+    .column {
+      float: left;
+      padding: 10px;
+      /* Should be removed. Only for demonstration */
+    }
+
+    .left {
+      width: 20%;
+    }
+
+    .right {
+      width: 80%;
+    }
+
+    .row {
+      height: 100px;
+    }
+
+    #blue {
+      /*background: rgb(0, 179, 255);*/
+      color: rgb(17, 42, 230);
+    }
+
+    #red {
+      /*background: rgb(5, 241, 5);*/
+      color: rgb(218, 18, 18);
+    }
+
+  </style>
+</head>
+
+<body ng-controller="ChatCtrl">
+  <h2>Hi {{username}}</h2>
+  <div class="row">
+    <h2>Select Your Language</h2>
+    <select class="form-control" id="srcLang" name="srcLang" ng-model="srcLang">
+      <option value="" selected disabled>Select Source Language</option>
+      <option value="en-US">English</option>
+      <option value="bn-IN">Bengali</option>
+      <option value="hi-IN">Hindi</option>
+      <option value="th-TH">Thai</option>
+      <option value="fr-FR">French</option>
+      <option value="zh-CH">Chinese</option>
+      <option value="es">Spanish</option>
+      <option value="de">German</option>
+      <option value="ru">Russian</option>
+      <option value="gu">Gujrati</option>
+      <option value="it">Italian</option>
+      <option value="ja">Japanese</option>
+    </select>
+    <button type="button" class="btn btn-success btn-xl" ng-click="SetLang(srcLang); spinner=true;">Set Language</button>
+  </div>
+  <hr>
+  <br>
+  <div class="row">
+    <div class="column left">
+      <div ng-repeat="row in loggedinUsers" ng-value="row._id">
+        <button type="button" id="{{ID}}" class="btn btn-success btn-xl" ng-click="SpeechToText(srcLang, row)" ng-hide="row.email == login_email">{{row.name}}</button>
+      </div>
+    </div>
+    <div class="column right">
+      <div class="overflow-auto" ng-repeat="row in chatArray">
+        <p align="left" id="{{row.id}}"> <b>{{row.user}}</b>{{': ' + row.text}}</p>
+      </div>
+      <!--<div class="row">
+        <button type="button" class="btn btn-success btn-xl" ng-click="SpeechToText(srcLang); spinner=true;">{{SpeakButtonLabel}}</button>
+      </div>-->
+    </div>
+  </div>
+
+</body>
+
+</html>

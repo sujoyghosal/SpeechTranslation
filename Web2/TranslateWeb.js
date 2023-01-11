@@ -6,7 +6,7 @@ app.use(helmet());
 app.use(express.static("www"));
 app.use(helmet());
 app.get("/", function (req, res) {
-  res.sendFile(path.join(__dirname + "/www/ListDonations.html"));
+  res.sendFile(path.join(__dirname + "/www/Login.html"));
   //__dirname : It will resolve to your project folder.
 });
 

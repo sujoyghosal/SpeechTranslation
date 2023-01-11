@@ -12,97 +12,97 @@ app.config([
     $routeProvider
       .when("/login", {
         templateUrl: "Login.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
         isLogin: true,
       })
       .when("/home", {
-        templateUrl: "home.html",
-        controller: "DonationCtrl",
+        templateUrl: "Chat.html",
+        controller: "ChatCtrl",
       })
       .when("/register", {
         templateUrl: "Register.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/updateuser", {
         templateUrl: "UpdateProfile.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/updatepassword", {
         templateUrl: "UpdateProfile.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/signup", {
         templateUrl: "Register.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/getdonation", {
         //templateUrl: "ListDonations.html",
         templateUrl: "ViewOffers.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/donationsaccepted", {
         templateUrl: "MyPickupList.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/offerdonation", {
         templateUrl: "OfferDonation.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/offershistory", {
         templateUrl: "MyOffers.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/createneed", {
         templateUrl: "CreateNeed.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/myneeds", {
         templateUrl: "MyNeeds.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/createemergency", {
         templateUrl: "CreateEmergency.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/viewneeds", {
         templateUrl: "NeedsNearby.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/viewemergencies", {
         templateUrl: "ViewEmergencies.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/settings", {
         templateUrl: "settings.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/subscribe", {
         templateUrl: "Subscribe2.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/sendnotification", {
         templateUrl: "SendPush.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/notifications", {
         templateUrl: "Notifications.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/eventsnearby", {
         templateUrl: "MyNearbyEvents.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/resetpw", {
         templateUrl: "ResetPassword.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/index", {
         templateUrl: "index.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .when("/contactus", {
         templateUrl: "ContactUs.html",
-        controller: "DonationCtrl",
+        controller: "ChatCtrl",
       })
       .otherwise({
         redirectTo: "/login",
@@ -250,29 +250,29 @@ app.service("UserService", function () {
 
 var BASEURL_BLUEMIX = "https://freecycleapissujoy.mybluemix.net";
 var BASEURL_LOCAL = "http://localhost:5555";
+var BASEURL_DOCKER = "http://localhost:49155";
 var BASEURL_PIVOTAL = "http://freecycleapissujoy-horned-erasure.cfapps.io";
 var BASEURL_PERSONAL = "https://freecycleapi.mybluemix.net";
 var BASEURL_GCP = "https://donation-demo-api-vq2uax3u4q-em.a.run.app";
 var BASEURL_IBM = "http://159.122.177.104:31072";
 
-var BASEURL = BASEURL_LOCAL;
+var BASEURL = BASEURL_DOCKER;
 var socket = null;
 var GEOCODEURL =
   "https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyAwQOPx91fjj06kDNq7hjkT-ZSxkQFtJPA";
 //"http://api.positionstack.com/v1/forward?access_key=cff8960a5b6a7fde5eac5d20b3d16295";
 
 app.controller(
-  "DonationCtrl",
+  "ChatCtrl",
   function (
     $scope,
     $rootScope,
     $http,
     $filter,
     $location,
-    $timeout,
+    $route,
     $window,
     Notification,
-    Socialshare,
     UserService,
     DataService
   ) {
@@ -283,8 +283,7 @@ app.controller(
     $scope.citydonations = "";
     $scope.cancel = false;
     $scope.uuid = UserService.getLoggedIn()._id;
-    $scope.lat = "";
-    $scope.lng = "";
+    $scope.ID = "blue";
     $scope.settings = adjustsettings(UserService.getLoggedIn().settings);
     $scope.selectedto = undefined;
     $scope.selectedfrom = undefined;
@@ -294,11 +293,12 @@ app.controller(
     $scope.found = "";
     $scope.result = "";
     $scope.groupusers = [];
-    var param_name = "";
-    $scope.offererUUID = "";
+    $rootScope.chatArray = [];
+    $rootScope.myText = "";
+    $scope.SpeakButtonLabe = "Click to Speak";
     $scope.reverseSort = false;
     $scope.emergency = false;
-    $scope.loggedinUsers = [];
+    $rootScope.loggedinUsers = [];
     $scope.synth = window.speechSynthesis;
     $scope.rate = 1;
     $scope.pitch = "1";
@@ -417,17 +417,20 @@ app.controller(
       }
     };
 
-    $scope.SpeechToText = function (srcLang, targetLang) {
+    $scope.SpeechToText = function (srcLang, obj) {
       /*
       var diagnostic = document.querySelector(".output");
       var bg = document.querySelector("html");
       var hints = document.querySelector(".hints");
       */
+      $scope.ID = "red";
+      $scope.targetUser = obj;
+      $scope.SpeakButtonLabel = "Say something to " + obj.name;
       $scope.recognition.lang = srcLang ? srcLang : "bn-IN";
       $scope.recognition.start();
       console.log("Ready to receive a speech command.");
-      $scope.targetLang = targetLang;
-      alert("Speak something in " + srcLang);
+      $scope.targetLang = $scope.targetLang ? $scope.targetLang : "en-US";
+      //alert("Speak something in " + srcLang);
     };
     $scope.recognition.onresult = function (event) {
       // The SpeechRecognitionEvent results property returns a SpeechRecognitionResultList object
@@ -438,13 +441,32 @@ app.controller(
       // These also have getters so they can be accessed like arrays.
       // The second [0] returns the SpeechRecognitionAlternative at position 0.
       // We then return the transcript property of the SpeechRecognitionAlternative object
-      var color = event.results[0][0].transcript;
-      alert(event.results[0][0].transcript);
+      $rootScope.chatArray.push({
+        user: $rootScope.username,
+        text: event.results[0][0].transcript,
+        id: "red",
+      });
+      //$rootScope.myText =
+      //  $rootScope.username + ": " + event.results[0][0].transcript;
+      //alert(event.results[0][0].transcript);
+      $rootScope.myText = JSON.stringify($rootScope.chatArray);
+      $scope.ID = "blue";
+      Notification.info({
+        message: event.results[0][0].transcript,
+        title: "New Event",
+        positionY: "top",
+        positionX: "center",
+        delay: 7000,
+      });
       console.log("Confidence: " + event.results[0][0].confidence);
       socket.emit("speech", {
+        source: {
+          sourceUserName: $rootScope.username,
+          sourceUserEmail: $rootScope.login_email,
+        },
         text: event.results[0][0].transcript,
         //target: targetLang.value,
-        target: $scope.targetLang ? $scope.targetLang : "hi-IN",
+        target: $scope.targetUser,
       });
     };
 
@@ -461,506 +483,6 @@ app.controller(
     };
 
     //Google
-    $scope.GeoCodeAddress = function (offer, func) {
-      console.log("Google GeoCode client..");
-      $http({
-        method: "GET",
-        url: encodeURI(GEOCODEURL + "&address=" + offer.address),
-      }).then(
-        function mySucces(response) {
-          if (
-            !DataService.isValidObject(response) ||
-            !DataService.isValidObject(response.data) ||
-            !DataService.isValidArray(response.data.results)
-          ) {
-            console.log("####Invalid response");
-            Notification.error({
-              message: "A problem occured!",
-              title: "Error",
-              positionY: "top",
-              positionX: "center",
-              delay: 4000,
-            });
-            return;
-          } else {
-            console.log(
-              "Awesome, a valid response!" + JSON.stringify(response)
-            );
-          }
-          $scope.geoCodeResponse = response.data;
-          $scope.geocodesuccess = true;
-          $scope.lat = $scope.geoCodeResponse.results[0].geometry.location.lat;
-          $scope.lng = $scope.geoCodeResponse.results[0].geometry.location.lng;
-          if (func && func === "need") {
-            console.log("Creating Need...");
-            $scope.CreateNeed(offer, false);
-          } else if (func && func === "emergency") {
-            console.log("Creating Emergency...");
-            $scope.CreateNeed(offer, true);
-          } else if (func && func === "offer") {
-            console.log("Creating Offer...");
-            $scope.SendOffer(offer);
-          } else {
-            console.log("No action after Geocoding");
-            Notification.error({
-              message: "A problem occured getting address latitude/longitude!",
-              title: "Error",
-              positionY: "top",
-              positionX: "center",
-              delay: 4000,
-            });
-          }
-        },
-        function myError(response) {
-          $scope.geoCodeResponse = response.statusText;
-          $scope.lat = null;
-          $scope.lng = null;
-          console.log("GeoCode error: " + JSON.stringify(response));
-        }
-      );
-    };
-    //Positionstack GeoCode
-    $scope.GeoCodeAddress2 = function (offer, func) {
-      console.log("GeoCode URL=" + GEOCODEURL + "&query=" + offer.address);
-
-      $http({
-        method: "GET",
-        url: encodeURI(GEOCODEURL + "&query=" + offer.address),
-      }).then(
-        function mySucces(response) {
-          if (
-            !DataService.isValidObject(response) ||
-            !DataService.isValidObject(response.data)
-          ) {
-            console.log("####Invalid response");
-            Notification.error({
-              message: "A problem occured!",
-              title: "Error",
-              positionY: "top",
-              positionX: "center",
-              delay: 4000,
-            });
-            return;
-          } else {
-            console.log(
-              "Awesome, a valid response!" + JSON.stringify(response)
-            );
-          }
-          $scope.geoCodeResponse = response.data.data[0];
-          $scope.geocodesuccess = true;
-          $scope.lat = $scope.geoCodeResponse.latitude;
-          $scope.lng = $scope.geoCodeResponse.longitude;
-          if (func && func === "need") {
-            console.log("Creating Need...");
-            $scope.CreateNeed(offer, false);
-          } else if (func && func === "emergency") {
-            console.log("Creating Emergency...");
-            $scope.CreateNeed(offer, true);
-          } else if (func && func === "offer") {
-            console.log("Creating Offer...");
-            $scope.SendOffer(offer);
-          } else {
-            console.log("No action after Geocoding");
-            Notification.error({
-              message: "A problem occured getting address latitude/longitude!",
-              title: "Error",
-              positionY: "top",
-              positionX: "center",
-              delay: 4000,
-            });
-          }
-        },
-        function myError(response) {
-          $scope.geoCodeResponse = response.statusText;
-          $scope.lat = null;
-          $scope.lng = null;
-        }
-      );
-    };
-    //Google
-    $scope.GeoCodeSubscribeEventsAddress = function () {
-      if (!$scope.event_receive || !$scope.event_receive.address) {
-        alert("No location preference given for events");
-        console.log(
-          "No location preference specified to receive vicinity events."
-        );
-        $scope.Subscribe();
-        return;
-      }
-
-      $http({
-        method: "GET",
-        url: encodeURI(GEOCODEURL + "&address=" + $scope.event_receive.address),
-      }).then(
-        function mySucces(response) {
-          if (
-            !DataService.isValidObject(response) ||
-            !DataService.isValidObject(response.data) ||
-            !DataService.isValidArray(response.data.results)
-          ) {
-            console.log("####Invalid response");
-            Notification.error({
-              message: "A problem occured!",
-              title: "Error",
-              positionY: "top",
-              positionX: "center",
-              delay: 4000,
-            });
-            return;
-          } else {
-            console.log(
-              "Awesome, a valid response!" + JSON.stringify(response)
-            );
-          }
-          $scope.geoCodeResponse = response.data;
-          $scope.geocodesuccess = true;
-          $scope.event_receive.lat =
-            $scope.geoCodeResponse.results[0].geometry.location.lat;
-          $scope.event_receive.lng =
-            $scope.geoCodeResponse.results[0].geometry.location.lng;
-          console.log(
-            "Geocoded Lat/Lng: " +
-              $scope.event_receive.lat +
-              "/" +
-              $scope.event_receive.lng
-          );
-
-          $scope.Subscribe();
-        },
-        function myError(response) {
-          $scope.geoCodeResponse = response.statusText;
-          $scope.lat = null;
-          $scope.lng = null;
-        }
-      );
-    };
-    //positionstack
-    $scope.GeoCodeSubscribeEventsAddress2 = function () {
-      console.log(
-        "GeoCode URL=" + GEOCODEURL + "&query=" + $scope.event_receive.address
-      );
-
-      $http({
-        method: "GET",
-        url: encodeURI(GEOCODEURL + "&query=" + $scope.event_receive.address),
-      }).then(
-        function mySucces(response) {
-          if (
-            !DataService.isValidObject(response) ||
-            !DataService.isValidObject(response.data)
-          ) {
-            console.log("####Invalid response");
-            Notification.error({
-              message: "A problem occured!",
-              title: "Error",
-              positionY: "top",
-              positionX: "center",
-              delay: 4000,
-            });
-            return;
-          } else {
-            console.log(
-              "Awesome, a valid response!" + JSON.stringify(response)
-            );
-          }
-          $scope.geoCodeResponse = response.data.data[0];
-          $scope.geocodesuccess = true;
-          $scope.event_receive.lat = $scope.geoCodeResponse.latitude;
-          $scope.event_receive.lng = $scope.geoCodeResponse.longitude;
-          console.log(
-            "Geocoded Lat/Lng: " +
-              $scope.event_receive.lat +
-              "/" +
-              $scope.event_receive.lng
-          );
-
-          $scope.Subscribe();
-        },
-        function myError(response) {
-          $scope.geoCodeResponse = response.statusText;
-          $scope.lat = null;
-          $scope.lng = null;
-        }
-      );
-    };
-    $scope.ShowDirections = function (address) {
-      $window.open(
-        "https://www.google.com/maps?saddr=My+Location&daddr=" + address + "/",
-        "_blank"
-      );
-    };
-    $scope.english = "";
-    $scope.GetFontAwesomeIconsForCategory = function (category) {
-      var icon = "";
-      if (!category || category.length < 4) return "fa fa-star";
-      switch (category.trim()) {
-        case "Electronics":
-          icon = "fa fa-mobile";
-          break;
-        case "Fashion":
-          icon = "fa fa-female";
-          break;
-        case "Educational":
-          icon = "fa fa-university";
-          break;
-        case "Blood":
-          icon = "fa fa-tint";
-          break;
-        case "Medical":
-          icon = "fa fa-stethoscope";
-          break;
-        case "Organs":
-          icon = "fa fa-heartbeat";
-          break;
-        case "Life Saving Drugs":
-          icon = "fa fa-hospital-o";
-          break;
-        case "General Medicines":
-          icon = "fa fa-medkit";
-          break;
-        case "Ambulance":
-          icon = "fa fa-ambulance";
-          break;
-        case "Doctor":
-          icon = "fa fa-user-md";
-          break;
-        case "Food":
-          icon = "fa fa-cutlery";
-          break;
-        case "Furniture":
-          icon = "fa fa-bed";
-          break;
-        case "Clothes":
-          icon = "fa fa-shirtsinbulk";
-          break;
-        case "Books":
-          icon = "fa-solid fa-books";
-          break;
-        case "Sports":
-          icon = "fa fa-futbol-o";
-          break;
-        case "Household":
-          icon = "fa fa-home";
-          break;
-        case "Shoes":
-          icon = "fa fa-tags";
-          break;
-        case "Other":
-          icon = "fa fa-star";
-        case "Natural Disaster":
-          icon = "fa fa-fire";
-          break;
-        case "Terrorism":
-          icon = "fa fa-bomb";
-          break;
-        case "Accident":
-          icon = "fa fa-ambulance";
-          break;
-        case "Women's Safety":
-          icon = "fa fa-life-ring";
-          break;
-        case "Children's Safety":
-          icon = "fa fa-child";
-          break;
-        default:
-          icon = "fa fa-star";
-      }
-      console.log(
-        "GetFontAwesomeIconsForCategory: Category=" +
-          category +
-          ", Icon=>" +
-          icon
-      );
-      return icon;
-    };
-    $scope.TranslateEventToEnglish = function (type) {
-      if (!type) $scope.english = "Emergency Event";
-      switch (type.toUpperCase().trim()) {
-        case "BLOOD":
-          $scope.english = "Blood Needed";
-          $scope.emergency = true;
-          break;
-        case "BLOOD":
-          $scope.english = "Blood Needed";
-          $scope.emergency = true;
-          break;
-        case "ORGANS":
-          $scope.english = "Organ Needed";
-          $scope.emergency = true;
-          break;
-        case "LIFE SAVING DRUGS":
-          $scope.english = "Life Saving Drugs Needed";
-          $scope.emergency = true;
-          break;
-        case "GENERAL MEDICINES":
-          $scope.english = "General Medicines Needed";
-          $scope.emergency = true;
-          break;
-        case "DOCTOR":
-          $scope.english = "Doctor Needed";
-          $scope.emergency = true;
-          break;
-        case "AMBULANCE":
-          $scope.english = "Ambulance Needed";
-          $scope.emergency = true;
-          break;
-        case "MEDICAL":
-          $scope.english = "Medical Needs";
-          $scope.emergency = true;
-          break;
-        case "DISASTER":
-          $scope.english = "Natural Disaster";
-          $scope.emergency = true;
-          break;
-        case "TERRORISM":
-          $scope.english = "Terror Attack";
-          $scope.emergency = true;
-          break;
-        case "ACCIDENT":
-          $scope.english = "Accident";
-          $scope.emergency = true;
-          break;
-        case "SAFETY":
-          $scope.english = "Incident";
-          $scope.emergency = true;
-          break;
-        case "OTHER":
-          $scope.english = "Other Emergency";
-          $scope.emergency = true;
-          break;
-        default:
-          $scope.english = type;
-      }
-      return $scope.english;
-    };
-    $scope.isEmergency = function (type) {
-      $scope.emergency = false;
-      $scope.TranslateEventToEnglish(type);
-      return $scope.emergency;
-    };
-    $scope.StackIcon = function (icon) {
-      console.log("####StackIcon = " + icon + " fa-stack-1x");
-      $scope.stackicon = icon + " fa-stack-1x";
-      return icon + " fa-stack-1x";
-    };
-    $scope.SendOffer = function (offer) {
-      $scope.loginResult = "";
-      var now = new Date();
-      $scope.loginResult = "Sent Request";
-      var postURL = BASEURL + "/donations/insert";
-      var reqObj = {
-        email: $scope.login_email,
-        postedby: $scope.login_fullname,
-        time: now,
-        phone_number: offer.phone,
-        address: offer.address,
-        city: offer.city,
-        items: offer.items,
-        itemtype: offer.itemtype,
-        location: {
-          latitude: $scope.lat,
-          longitude: $scope.lng,
-        },
-        fa_icon: $scope.GetFontAwesomeIconsForCategory(offer.itemtype),
-      };
-      postURL = encodeURI(postURL);
-      $http.post(postURL, JSON.stringify(reqObj)).then(
-        function successCallback(response) {
-          // this callback will be called asynchronously
-          // when the response is available
-          console.log("Create Donation Response:" + JSON.stringify(response));
-          $scope.loginResult = "Success";
-          Notification.success({
-            message: "Good job! Successufully Published Your Offer. Thank You!",
-            positionY: "bottom",
-            positionX: "center",
-          });
-          //Notification.success({message: 'Success Top Left', positionX: 'left'});
-          $scope.spinner = false;
-          $scope.status = response.statusText;
-          offer.type = "DonationOffer";
-          /*$scope.CheckIfEventTypeExists(
-            "DONATE-" +
-              offer.itemtype.trim().toUpperCase() +
-              offer.city.trim().toUpperCase()
-          );
-                        notifyUsersInGroup(
-                                          "FROM-" +
-                                          offer.city.trim().toUpperCase() +
-                                          "-" +
-                                          offer.from.trim().toUpperCase(),
-                                          offer.from,
-                                          filteredtime,
-                                          offer.name,
-                                          offer.phone
-                                      );*/
-          //      alert("Offer " + response.statusText);
-          //   var MS_PER_MINUTE = 60000;
-          //   var myStartDate = new Date(offerDate.valueOf() - 15 * MS_PER_MINUTE);
-          //send notification to creator 15 min b4 donation starts
-          //               schedulePush(new Date());
-        },
-        function errorCallback(error) {
-          // called asynchronously if an error occurs
-          // or server returns response with an error status.
-          $scope.loginResult =
-            "Error Received from Server.." + error.toString();
-          Notification.error({
-            message: "Error processing this request. Please try again later!",
-            positionY: "bottom",
-            positionX: "center",
-          });
-          $scope.spinner = false;
-          $scope.status = error.statusText;
-        }
-      );
-    };
-    $scope.CheckIfEventTypeExists = function (event) {
-      var sendURL = BASEURL + "/events?type=" + event;
-
-      $http({
-        method: "GET",
-        url: encodeURI(sendURL),
-      }).then(
-        function successCallback(response) {
-          // this callback will be called asynchronously
-          // when the response is available
-          $scope.loginResult = "Success";
-          if (
-            response &&
-            response.data &&
-            response.data.entities &&
-            response.data.entities.length > 0
-          ) {
-            $scope.loginResult = "Success";
-            console.log(
-              "CheckIfEventTypeExists: Event type exists for event " + event
-            );
-            $scope.spinner = false;
-            // Connect event uuid with group name
-            $scope.CreateEvent(event, response.data.entities[0].uuid, event);
-          } else {
-            console.log(
-              "CheckIfEventTypeExists: Event type does not exists: " + event
-            );
-            $scope.spinner = false;
-          }
-        },
-        function errorCallback(error) {
-          // called asynchronously if an error occurs
-          // or server returns response with an error status.
-          $scope.loginResult =
-            "Error Received from Server.." + error.toString();
-          Notification.error({
-            message: "Error processing this request. Please try again later!",
-            positionY: "bottom",
-            positionX: "center",
-          });
-          $scope.spinner = false;
-          $scope.status = error.statusText;
-        }
-      );
-    };
     $scope.events = [];
     $scope.setupWebSockets = function (purpose, arg) {
       socket = io(BASEURL, {
@@ -971,30 +493,55 @@ app.controller(
       });
       socket.on("connect", () => {
         console.log("Connected to WebSocket server..socket id " + socket.id); // x8WIv7-mJelg7on_ALbx
-        console.log(
+        /*console.log(
           "Creating rooms for subscribed events: " +
             JSON.stringify($rootScope.subscribed_events)
-        );
-        //createRoom($rootScope.subscribed_events);
+        );*/
+        createRoom($scope.login_email);
         socket.emit("send-login", {
           userInfo: UserService.getLoggedIn(),
         });
       });
       socket.on("loggedin-users", (data) => {
-        console.log(
-          "Received logged in users info from server: " + JSON.stringify(data)
-        );
-        $scope.loggedinUsers = data;
+        $rootScope.loggedinUsers = data.currentUsers;
+        //$route.reload();
+      });
+      socket.on("new-loggedin-user", (data) => {
+        var newUser = data.newUser;
+        var found = false;
+        for (i = 0; i < $rootScope.loggedinUsers.length; i++) {
+          if ($rootScope.loggedinUsers[i].email == newUser.email) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          console.log(
+            "New User has logged in, refreshing users list with " + newUser.name
+          );
+          $rootScope.loggedinUsers.push(newUser);
+        }
+        //$route.reload();
       });
       //var socket = io("http://localhost:5555");
       socket.on("event", (data) => {
         Notification.info({
-          message: JSON.stringify(data),
+          message: "New Chat Message Arrived", //JSON.stringify(data),
           title: "New Event",
           positionY: "top",
           positionX: "center",
           delay: 7000,
         });
+        console.log("Event received from server : " + JSON.stringify(data));
+        $rootScope.chatArray.push({
+          user: data.sourceSpeaker.sourceUserName,
+          text: data.text,
+          id: "blue",
+        });
+        //$rootScope.myText =
+        //  data.sourceSpeaker.sourceUserName + ": " + JSON.stringify(data.text);
+        $rootScope.myText = JSON.stringify($rootScope.chatArray);
+        $scope.ID = "red";
         $scope.Speak(data.lang, data.text);
       });
 
@@ -1037,10 +584,10 @@ app.controller(
       });
       $scope.events = [];
     };
-    function createRooms() {
+    function createRoom(email) {
       if (socket) {
         socket.emit("create-room", {
-          channels: $rootScope.subscribed_events,
+          channel: email,
         });
       } else {
         console.log(
@@ -1049,117 +596,7 @@ app.controller(
         $scope.setupWebSockets("init", null);
       }
     }
-    //$scope.setupWebSockets("init", null);
-    $scope.CreateNeed = function (need, emergency) {
-      var postURL = BASEURL + "/needs/insert";
-      var reqObj = {
-        email: $scope.login_email,
-        postedby: $scope.login_fullname,
-        time: new Date().toLocaleString(),
-        phone_number: need.phone,
-        address: need.address,
-        city: need.city,
-        items: need.items,
-        itemtype: need.itemtype,
-        location: {
-          latitude: $scope.lat,
-          longitude: $scope.lng,
-        },
-        fa_icon: $scope.GetFontAwesomeIconsForCategory(need.itemtype),
-        emergency: emergency,
-      };
-      postURL = encodeURI(postURL);
-      $http.post(postURL, JSON.stringify(reqObj)).then(
-        function successCallback(response) {
-          // this callback will be called asynchronously
-          // when the response is available
-          $scope.loginResult = "Success";
-          Notification.success({
-            message: "Successufully Published Your Need. Thank You!",
-            title: "Good job!",
-            positionY: "bottom",
-            positionX: "center",
-            delay: 4000,
-          });
-          $scope.spinner = false;
-          $scope.status = response.statusText;
-          /*              notifyUsersInGroup(
-                                          "FROM-" +
-                                          offer.city.trim().toUpperCase() +
-                                          "-" +
-                                          offer.from.trim().toUpperCase(),
-                                          offer.from,
-                                          filteredtime,
-                                          offer.name,
-                                          offer.phone
-                                      );*/
-          //      alert("Offer " + response.statusText);
-          //   var MS_PER_MINUTE = 60000;
-          //   var myStartDate = new Date(offerDate.valueOf() - 15 * MS_PER_MINUTE);
-          //send notification to creator 15 min b4 donation starts
-          //               schedulePush(new Date());
-          if (emergency && response) {
-            $scope.CheckIfEventTypeExists(need);
-          }
-        },
-        function errorCallback(error) {
-          // called asynchronously if an error occurs
-          // or server returns response with an error status.
-          $scope.loginResult =
-            "A problem occurred processing the request. Please try again later.";
-          Notification.error({
-            message: "Error processing this request. Please try again later!",
-            positionY: "bottom",
-            positionX: "center",
-          });
-          $scope.spinner = false;
-          $scope.status =
-            "A problem occurred processing the request. Please try again later.";
-        }
-      );
-    };
-    $scope.Redirect = function (url) {
-      $location.path(url);
-    };
 
-    function schedulePush(time) {
-      window.plugin.notification.local.add({
-        date: time,
-        message: "Your donation offer is in 15min. Please start.",
-      });
-    }
-
-    $scope.SendPush = function (gcmids, text) {
-      if (!gcmids || !text) return;
-      if (text.length === 0) {
-        console.log("No text for push message. ");
-        return;
-      }
-      $scope.spinner = true;
-
-      var notifyURL =
-        BASEURL + "/sendpush/devicespush?regids=" + gcmids + "&text=" + text;
-      console.log("SendPush: notifyURL=" + notifyURL);
-      $http({
-        method: "GET",
-        url: encodeURI(notifyURL),
-      }).then(
-        function successCallback(response) {
-          $scope.spinner = false;
-
-          //   $scope.result = "Successfully Sent Push Messages to Subscribed Users for these locations.";
-        },
-        function errorCallback(error) {
-          $scope.spinner = false;
-          Notification.error({
-            message: "Error processing this request. Please try again later!",
-            positionY: "bottom",
-            positionX: "center",
-          });
-          //          $scope.result = "Could not send push messages. ";
-        }
-      );
-    };
     $scope.CreateEvent = function (event, group_uuid, group_name) {
       $scope.loginResult = "";
       var now = new Date();
@@ -1206,31 +643,49 @@ app.controller(
         }
       );
     };
-    $scope.ConnectEntities = function (uuid1, uuid2) {
-      if (!uuid1 || !uuid2) {
-        console.log("ConnectEntities - Invalid Parameters");
-        return;
-      }
-      var getURL =
-        BASEURL + "/connectentities?uuid1=" + uuid1 + "&uuid2=" + uuid2;
-      getURL = encodeURI(getURL);
-      $http({
-        method: "GET",
-        url: getURL,
-      }).then(
+
+    $scope.SetChat = function (obj) {
+      //alert("Chatting with " + obj.name);
+      $scope.ID = "red";
+      $scope.targetUser = obj;
+      $scope.SpeakButtonLabel = "Say something to " + obj.name;
+      //SpeechToText(srcLang);
+    };
+
+    $scope.SetLang = function (srcLang) {
+      var postURL = BASEURL + "/setLang";
+      var reqObj = {
+        email: $scope.login_email,
+        lang: srcLang,
+      };
+      console.log("SetLang Req Object = " + JSON.stringify(reqObj));
+      postURL = encodeURI(postURL);
+      $http.post(postURL, JSON.stringify(reqObj)).then(
         function successCallback(response) {
           // this callback will be called asynchronously
           // when the response is available
-          console.log("Successful Connection of Entities");
+          //      $scope.loginResult = response.data;
+          $scope.spinner = false;
+          console.log("setLang Successful!");
+          Notification.success({
+            message: "Preferred language successfully set to " + srcLang + "!",
+            positionY: "bottom",
+            positionX: "center",
+          });
+          return;
         },
         function errorCallback(error) {
-          // called asynchronously if an error occurs
-          // or server returns response with an error status.
-          console.log("Failed to connect entities");
+          console.log("setLang Failed: " + JSON.stringify(error));
+          $scope.spinner = false;
+          Notification.error({
+            message:
+              "Error Setting Language Preference. Please try again later!",
+            positionY: "bottom",
+            positionX: "center",
+          });
         }
       );
     };
-
     $scope.Login2 = function (login) {
       $scope.spinner = true;
       var getURL =
@@ -1263,7 +718,7 @@ app.controller(
             });
             return;
           } else {
-            console.log("Login Success! " + JSON.stringify(response));
+            console.log("Login Success!");
             var obj = response.data;
             UserService.setLoggedIn(obj);
             UserService.setLoggedInStatus(true);
@@ -1283,7 +738,7 @@ app.controller(
             //$rootScope.$emit("CallCreateRoomsMethod", {});
             //$location.path($rootScope.savedLocation);
             $scope.setupWebSockets("init", null);
-            $rootScope.$emit("CallGetEventsMethod", {});
+            //$rootScope.$emit("CallGetEventsMethod", {});
             return;
           }
         },
@@ -1303,729 +758,6 @@ app.controller(
           }
           $scope.spinner = false;
           $scope.loginResult = "Login Failed";
-        }
-      );
-    };
-    var notifyUsersInGroup = function (group, from, time, by, phone) {
-      $scope.spinner = true;
-      //first create group with id=<city>-<place>
-      var getURL = BASEURL + "/getusersingroup?group=" + group;
-      getURL = encodeURI(getURL);
-      $http({
-        method: "GET",
-        url: getURL,
-      }).then(
-        function successCallback(response) {
-          // this callback will be called asynchronously
-          // when the response is available
-          $scope.spinner = false;
-          var users = [];
-          var gcmids = "";
-          users = response.data;
-          for (var i = 0; i < users.length; i++) {
-            if (!checkIfPushAllowedNow(users[i].settings)) continue;
-            var gcms = [];
-            gcms = users[i].gcm_ids;
-            for (var j = 0; j < gcms.length; j++) {
-              //   gcmids.push(gcms[j]);
-              gcmids += gcms[j] + "^";
-            }
-          }
-
-          $scope.SendPush(
-            gcmids,
-            "A new donation created by " +
-              by +
-              "(ph: " +
-              phone +
-              "), pickup at " +
-              time +
-              " from " +
-              from
-          );
-
-          // $scope.found  = "Active donation offers for " + param_name;
-        },
-        function errorCallback(error) {
-          // called asynchronously if an error occurs
-          // or server returns response with an error status.
-          $scope.spinner = false;
-          $scope.groupusers = "ERROR GETTING GROUP USERS ";
-          $scope.alldonations = false;
-        }
-      );
-    };
-
-    function checkIfPushAllowedNow(settingsObject) {
-      //       console.log("checkIfPushAllowedNow: received input - " + JSON.stringify(settingsObject));
-      if (settingsObject === undefined || !settingsObject) return true;
-
-      if (settingsObject.pushon) {
-        var start = new Date();
-        start.setHours(
-          settingsObject.pushstarttimehrs,
-          settingsObject.pushstarttimemin
-        );
-        var stop = new Date();
-        stop.setHours(
-          settingsObject.pushstoptimehrs,
-          settingsObject.pushstoptimemin
-        );
-        var timenow = new Date();
-        if (stop < start) stop.setDate(timenow.getDate() + 1);
-        if (stop == start) return true;
-        if (timenow < start || timenow > stop) {
-          return false;
-        } else {
-          return true;
-        }
-      } else return false;
-    }
-    $scope.SocialShare = function (row, site) {
-      if (!DataService.isValidObject(row)) return;
-      var message = row.items;
-      var title = "";
-      if (!DataService.isUnDefined(row.postedby)) {
-        message += " posted by " + row.postedby;
-        title = "FreeCycle Alert: " + row.itemtype;
-      } else if (!DataService.isUnDefined(row.postedby)) {
-        message += " offered by " + row.postedby;
-        title = "FreeCycle Alert: " + row.itemtype + " Item Offered";
-      }
-      message += " at " + row.address + "; posted on " + new Date(row.modified);
-      var options = {};
-      switch (site) {
-        case "twitter":
-          options = {
-            provider: "twitter",
-            attrs: {
-              socialshareText: message,
-            },
-          };
-          break;
-        case "facebook":
-          options = {
-            provider: "facebook",
-            attrs: {
-              socialshareQuote: message,
-              //socialshareVia: "1942374775794853"
-            },
-          };
-          break;
-        case "google":
-          options = {
-            provider: "google",
-            attrs: {
-              socialshareUrl: "http://720kb.net",
-            },
-          };
-          break;
-        case "linkedin":
-          options = {
-            provider: "linkedin",
-            attrs: {
-              socialshareText: title,
-              socialshareDescription: message,
-            },
-          };
-          break;
-        case "flipboard":
-          options = {
-            provider: "flipboard",
-            attrs: {
-              socialshareText: message,
-              socialshareUrl: "http://720kb.net",
-            },
-          };
-          break;
-        case "pocket":
-          options = {
-            provider: "pocket",
-            attrs: {
-              socialshareText: message,
-              socialshareUrl: "http://720kb.net",
-            },
-          };
-          break;
-        case "tumblr":
-          options = {
-            provider: "tumblr",
-            attrs: {
-              socialshareText: message,
-              socialshareUrl: "http://720kb.net",
-            },
-          };
-          break;
-        case "pinterest":
-          options = {
-            provider: "pinterest",
-            attrs: {
-              socialshareText: message,
-              socialshareUrl: "http://720kb.net",
-            },
-          };
-          break;
-        case "stumbleupon":
-          options = {
-            provider: "stumbleupon",
-            attrs: {
-              socialshareText: message,
-              socialshareUrl: "http://720kb.net",
-            },
-          };
-          break;
-        case "digg":
-          options = {
-            provider: "digg",
-            attrs: {
-              socialshareText: message,
-              socialshareUrl: "http://720kb.net",
-            },
-          };
-          break;
-      }
-      Socialshare.share(options);
-    };
-    $scope.GetDonations = function (paramname, paramvalue, myoffers) {
-      if (!paramvalue || paramvalue.length < 2) {
-        alert(
-          "Need " + paramname,
-          "Please provide a valid " + paramname,
-          "warning"
-        );
-        return;
-      }
-      $scope.spinner = true;
-      param_name = paramname.trim();
-      var getURL =
-        BASEURL +
-        "/getdonations?paramname=" +
-        param_name +
-        "&paramvalue=" +
-        paramvalue.trim();
-      getURL = encodeURI(getURL);
-
-      $http({
-        method: "GET",
-        url: getURL,
-      }).then(
-        function successCallback(response) {
-          // this callback will be called asynchronously
-          // when the response is available
-          if (
-            !DataService.isValidObject(response) ||
-            !DataService.isValidArray(response.data)
-          ) {
-            if (DataService.isString(response)) {
-              console.log("####Invalid response: " + JSON.stringify(response));
-              Notification.error({
-                message: "A problem occured!",
-                title: "Error",
-                positionY: "bottom",
-                positionX: "center",
-                delay: 4000,
-              });
-              return;
-            } else {
-              console.log("####Invalid response - null or undefined");
-              Notification.error({
-                message: "A problem occured!",
-                title: "Error",
-                positionY: "bottom",
-                positionX: "center",
-                delay: 4000,
-              });
-              return;
-            }
-          } else {
-            console.log("Awesome, a valid response!");
-          }
-          $scope.spinner = false;
-          $scope.citydonations = response.data;
-
-          //Show only newer offers
-          var ONE_DAY = 24 * 60 * 60 * 1000; //ms
-          var filteredDonations = [];
-
-          if ($scope.citydonations && $scope.citydonations.length > 0) {
-            for (var i = 0; i < $scope.citydonations.length; i++) {
-              var d = new Date();
-              var o = new Date($scope.citydonations[i].modified);
-              if (!myoffers) {
-                if (
-                  d - o > 7 * ONE_DAY ||
-                  $scope.citydonations[i].email === $scope.login_email
-                )
-                  continue;
-                else filteredDonations.push($scope.citydonations[i]);
-              } else {
-                filteredDonations.push($scope.citydonations[i]);
-              }
-            }
-            //console.log("Filtered " + ($scope.citydonations.length - filteredDonations.length) + " old records");
-            $scope.citydonations = filteredDonations;
-            $scope.found = "Found " + $scope.citydonations.length + " offers";
-          } else {
-            $scope.found = "No Offers Found";
-          }
-          if ($scope.citydonations.length == 0) {
-            $scope.alldonations = false;
-            return;
-          }
-          $scope.alldonations = true;
-          $scope.cancel = false;
-        },
-        function errorCallback(error) {
-          // called asynchronously if an error occurs
-          // or server returns response with an error status.
-          $scope.spinner = false;
-          //      $scope.result = "Could not submit acceptance. " + error;
-          Notification.error({
-            message: "Error processing this request. Please try again later!",
-            positionY: "bottom",
-            positionX: "center",
-          });
-          $scope.alldonations = false;
-        }
-      );
-    };
-    $scope.GetEventsByEmailAndType = function (email, type) {
-      $scope.spinner = true;
-      if (!email || email.length < 2) {
-        alert("Please enter valid email");
-        return;
-      }
-
-      var getURL =
-        BASEURL +
-        "/eventsbyemailandtype?email=" +
-        email.trim() +
-        "&type=" +
-        type;
-      getURL = encodeURI(getURL);
-      $http({
-        method: "GET",
-        url: getURL,
-      }).then(
-        function successCallback(response) {
-          // this callback will be called asynchronously
-          // when the response is available
-
-          console.log(
-            "GetEventsByEmailAndType Response - " + JSON.stringify(response)
-          );
-          $scope.spinner = false;
-          $scope.events = response.data;
-          $scope.list_events = true;
-          $scope.result = "";
-          if (!$scope.events || $scope.events.length == 0) {
-            $scope.list_events = false;
-            $scope.result = "No events found";
-          }
-          //    if (angular.isObject($scope.cityneeds))
-          //       $scope.found = $scope.cityneeds.length + " found";
-          /*var ONE_DAY = 24 * 60 * 60 * 1000; //ms
-          var filteredNeeds = [];
-          if ($scope.cityneeds && $scope.cityneeds.length > 0) {
-            for (var i = 0; i < $scope.cityneeds.length; i++) {
-              var d = new Date();
-              var o = new Date($scope.cityneeds[i].modified);
-              if (d - o > 7 * ONE_DAY) continue;
-              else if (
-                !emergency &&
-                $scope.cityneeds[i].email === $scope.login_email
-              )
-                continue;
-              else filteredNeeds.push($scope.cityneeds[i]);
-            }
-            //console.log("Filtered " + ($scope.cityneeds.length - filteredNeeds.length) + " old records");
-            $scope.cityneeds = filteredNeeds;
-            $scope.found = $scope.cityneeds.length + " found";
-            if ($scope.cityneeds.length == 0) {
-              $scope.allneeds = false;
-              return;
-            } else {
-              $scope.allneeds = true;
-              $scope.cancel = false;
-            }
-          } else {
-            $scope.cityneeds = [];
-            $scope.found = "None found";
-            $scope.spinner = false;
-            $scope.alldonations = false;
-            $scope.allneeds = false;
-            return;
-          }*/
-        },
-        function errorCallback(error) {
-          // called asynchronously if an error occurs
-          // or server returns response with an error status.
-          $scope.spinner = false;
-          //      $scope.result = "Could not submit acceptance. " + error;
-          Notification.error({
-            message: "Error processing this request. Please try again later!",
-            positionY: "bottom",
-            positionX: "center",
-          });
-          $scope.alldonations = false;
-        }
-      );
-    };
-    $scope.GetEventsByCityAndType = function (city, type) {
-      $scope.spinner = true;
-      if (!city || city.length < 2) {
-        alert("Please enter valid city");
-        return;
-      }
-
-      var getURL =
-        BASEURL + "/eventsbycityandtype?city=" + city.trim() + "&type=" + type;
-      getURL = encodeURI(getURL);
-      $http({
-        method: "GET",
-        url: getURL,
-      }).then(
-        function successCallback(response) {
-          // this callback will be called asynchronously
-          // when the response is available
-
-          console.log("GetNeedsByCity Response - " + JSON.stringify(response));
-          $scope.spinner = false;
-          $scope.events = response.data;
-          $scope.list_events = true;
-          $scope.result = "";
-          if (!$scope.events || $scope.events.length == 0) {
-            $scope.list_events = false;
-            $scope.result = "No events found";
-          }
-          //    if (angular.isObject($scope.cityneeds))
-          //       $scope.found = $scope.cityneeds.length + " found";
-          /*var ONE_DAY = 24 * 60 * 60 * 1000; //ms
-          var filteredNeeds = [];
-          if ($scope.cityneeds && $scope.cityneeds.length > 0) {
-            for (var i = 0; i < $scope.cityneeds.length; i++) {
-              var d = new Date();
-              var o = new Date($scope.cityneeds[i].modified);
-              if (d - o > 7 * ONE_DAY) continue;
-              else if (
-                !emergency &&
-                $scope.cityneeds[i].email === $scope.login_email
-              )
-                continue;
-              else filteredNeeds.push($scope.cityneeds[i]);
-            }
-            //console.log("Filtered " + ($scope.cityneeds.length - filteredNeeds.length) + " old records");
-            $scope.cityneeds = filteredNeeds;
-            $scope.found = $scope.cityneeds.length + " found";
-            if ($scope.cityneeds.length == 0) {
-              $scope.allneeds = false;
-              return;
-            } else {
-              $scope.allneeds = true;
-              $scope.cancel = false;
-            }
-          } else {
-            $scope.cityneeds = [];
-            $scope.found = "None found";
-            $scope.spinner = false;
-            $scope.alldonations = false;
-            $scope.allneeds = false;
-            return;
-          }*/
-        },
-        function errorCallback(error) {
-          // called asynchronously if an error occurs
-          // or server returns response with an error status.
-          $scope.spinner = false;
-          //      $scope.result = "Could not submit acceptance. " + error;
-          Notification.error({
-            message: "Error processing this request. Please try again later!",
-            positionY: "bottom",
-            positionX: "center",
-          });
-          $scope.alldonations = false;
-        }
-      );
-    };
-    $scope.PopulateDefaultAddress = function () {
-      var obj = UserService.getLoggedIn();
-      $scope.address = JSON.stringify(obj.address);
-    };
-    $scope.OrchestrateGetNearby = function (data, type) {
-      if (!data || !data.searchAddress || data.searchAddress.length < 5) {
-        Notification.error({
-          message: "Please provide a valid address",
-          positionY: "bottom",
-          positionX: "center",
-        });
-        return;
-      }
-      if (!data.distance) {
-        Notification.error({
-          message: "Please select distance",
-          positionY: "bottom",
-          positionX: "center",
-        });
-        return;
-      }
-      $scope.list_events = false;
-      $http({
-        method: "GET",
-        url: encodeURI(GEOCODEURL + "&address=" + data.searchAddress),
-        //url: encodeURI(GEOCODEURL + "&query=" + data.searchAddress),
-      }).then(
-        function mySucces(response) {
-          if (
-            !DataService.isValidObject(response) ||
-            !DataService.isValidObject(response.data)
-            //!DataService.isValidArray(response.data.results)
-          ) {
-            console.log("####Invalid response");
-            Notification.error({
-              message: "A problem occured!",
-              title: "Error",
-              positionY: "bottom",
-              positionX: "center",
-              delay: 4000,
-            });
-            return;
-          } else {
-            console.log("Awesome, a valid response!");
-          }
-          $scope.geoCodeResponse = response.data;
-          $scope.geocodesuccess = true;
-          data.lat = $scope.geoCodeResponse.results[0].geometry.location.lat;
-          data.lng = $scope.geoCodeResponse.results[0].geometry.location.lng;
-          /*$scope.geoCodeResponse = response.data.data[0];
-          $scope.geocodesuccess = true;
-          data.lat = $scope.geoCodeResponse.latitude;
-          data.lng = $scope.geoCodeResponse.longitude;*/
-
-          console.log("Geocoding result: " + data.lat + "," + data.lng);
-          $scope.GetNearby(data, type);
-        },
-        function myError(response) {
-          $scope.geoCodeResponse = response.statusText;
-        }
-      );
-    };
-    $scope.GetNearby = function (data, type) {
-      $scope.spinner = true;
-      if (!data.distance) {
-        //alert("Invalid Distance");
-        Notification.error({
-          message: "Please select distance",
-          title: "Error",
-          positionY: "bottom",
-          positionX: "center",
-          delay: 4000,
-        });
-        return;
-      }
-      if (!type) {
-        //alert("Invalid Type");
-        Notification.error({
-          message: "Please select Item Type",
-          title: "Error",
-          positionY: "bottom",
-          positionX: "center",
-          delay: 4000,
-        });
-        return;
-      }
-      var getURL =
-        BASEURL +
-        "/fetchnearbyevents?max_distance=" +
-        data.distance * 1000 +
-        "&lat=" +
-        data.lat +
-        "&lng=" +
-        data.lng +
-        "&type=" +
-        type;
-
-      getURL = encodeURI(getURL);
-      console.log("Vicinity Query: " + getURL);
-      $http({
-        method: "GET",
-        url: getURL,
-      }).then(
-        function successCallback(response) {
-          // this callback will be called asynchronously
-          // when the response is available
-          if (response) {
-            console.log(
-              "Fetch Nearby Events Query Response - " + JSON.stringify(response)
-            );
-          }
-          $scope.spinner = false;
-          $scope.citydonations = response.data;
-          $scope.events = response.data;
-          $scope.list_events = true;
-          $scope.result = "";
-          if (!$scope.events || $scope.events.length == 0) {
-            $scope.list_events = false;
-            $scope.result = "No events found for this criteria";
-          }
-          /*
-          //    if (angular.isObject($scope.citydonations))
-          //       $scope.found = $scope.citydonations.length + " found";
-          //show last 2 days only
-          var ONE_DAY = 24 * 60 * 60 * 1000; //ms
-          var filteredNeeds = [];
-          if ($scope.cityneeds && $scope.cityneeds.length > 0) {
-            for (var i = 0; i < $scope.cityneeds.length; i++) {
-              var d = new Date();
-              var o = new Date($scope.cityneeds[i].modified);
-              if (d - o > 7 * ONE_DAY) continue;
-              else if (
-                type != "emergency" &&
-                $scope.cityneeds[i].email === $scope.login_email
-              )
-                continue;
-              else filteredNeeds.push($scope.cityneeds[i]);
-            }
-            //console.log("Filtered " + ($scope.cityneeds.length - filteredNeeds.length) + " old records");
-            $scope.cityneeds = filteredNeeds;
-            $scope.citydonations = filteredNeeds;
-            $scope.found = $scope.cityneeds.length + " found";
-            if ($scope.cityneeds.length > 0) {
-              $scope.cancel = false;
-              $scope.allneeds = true;
-              $scope.alldonations = true;
-              return;
-            }
-          } else {
-            $scope.cityneeds = [];
-            $scope.citydonations = [];
-            $scope.found = "None found";
-            $scope.allneeds = false;
-            $scope.alldonations = false;
-            $scope.spinner = false;
-          }*/
-        },
-        function errorCallback(error) {
-          // called asynchronously if an error occurs
-          // or server returns response with an error status.
-          $scope.spinner = false;
-          Notification.error({
-            message: "Error processing this request. Please try again later!",
-            positionY: "bottom",
-            positionX: "center",
-          });
-          $scope.allneeds = false;
-          $scope.alldonations = false;
-        }
-      );
-    };
-
-    $scope.GetMyNearbyEvents = function () {
-      if (
-        $rootScope.event_receive_max_distance &&
-        $rootScope.event_receive_location &&
-        $rootScope.event_receive_location.coordinates
-      ) {
-        Notification.info({
-          message:
-            "Fetching events within " +
-            $rootScope.event_receive_max_distance +
-            "km of coordinates (lat, lng) " +
-            $rootScope.event_receive_location.coordinates[1] +
-            ", " +
-            $rootScope.event_receive_location.coordinates[0],
-          positionY: "bottom",
-          positionX: "center",
-        });
-      } else {
-        Notification.error({
-          message:
-            "Please specify your location criteria in Events->Subscribe page to view nearby events",
-          positionY: "bottom",
-          positionX: "center",
-        });
-        $scope.spinner = false;
-        return;
-      }
-      $scope.spinner = true;
-      var getURL =
-        BASEURL +
-        "/fetchmynearbyevents?max_distance=" +
-        $rootScope.event_receive_max_distance * 1000 +
-        "&lng=" +
-        $rootScope.event_receive_location.coordinates[0] +
-        "&lat=" +
-        $rootScope.event_receive_location.coordinates[1];
-
-      getURL = encodeURI(getURL);
-      console.log("Vicinity Query: " + getURL);
-      $scope.showevents = false;
-      $http({
-        method: "GET",
-        url: getURL,
-      }).then(
-        function successCallback(response) {
-          // this callback will be called asynchronously
-          // when the response is available
-          if (response) {
-            console.log("GetMyNearbyEvents Query Successful!!");
-          }
-          $scope.spinner = false;
-          $scope.showevents = true;
-          $scope.events = response.data;
-          $scope.list_events = true;
-          $scope.result = "";
-          if (!$scope.events || $scope.events.length == 0) {
-            $scope.list_events = false;
-            $scope.result = "No events found for this criteria";
-          }
-          /*
-          //    if (angular.isObject($scope.citydonations))
-          //       $scope.found = $scope.citydonations.length + " found";
-          //show last 2 days only
-          var ONE_DAY = 24 * 60 * 60 * 1000; //ms
-          var filteredNeeds = [];
-          if ($scope.cityneeds && $scope.cityneeds.length > 0) {
-            for (var i = 0; i < $scope.cityneeds.length; i++) {
-              var d = new Date();
-              var o = new Date($scope.cityneeds[i].modified);
-              if (d - o > 7 * ONE_DAY) continue;
-              else if (
-                type != "emergency" &&
-                $scope.cityneeds[i].email === $scope.login_email
-              )
-                continue;
-              else filteredNeeds.push($scope.cityneeds[i]);
-            }
-            //console.log("Filtered " + ($scope.cityneeds.length - filteredNeeds.length) + " old records");
-            $scope.cityneeds = filteredNeeds;
-            $scope.citydonations = filteredNeeds;
-            $scope.found = $scope.cityneeds.length + " found";
-            if ($scope.cityneeds.length > 0) {
-              $scope.cancel = false;
-              $scope.allneeds = true;
-              $scope.alldonations = true;
-              return;
-            }
-          } else {
-            $scope.cityneeds = [];
-            $scope.citydonations = [];
-            $scope.found = "None found";
-            $scope.allneeds = false;
-            $scope.alldonations = false;
-            $scope.spinner = false;
-          }*/
-        },
-        function errorCallback(error) {
-          // called asynchronously if an error occurs
-          // or server returns response with an error status.
-          $scope.spinner = false;
-          Notification.error({
-            message: "Error processing this request. Please try again later!",
-            positionY: "bottom",
-            positionX: "center",
-          });
-          $scope.allneeds = false;
-          $scope.alldonations = false;
         }
       );
     };

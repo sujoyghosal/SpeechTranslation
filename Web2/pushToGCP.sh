@@ -1,1 +1,1 @@
-gcloud run deploy translate-web --source .
+gcloud run deploy translateweb --source .

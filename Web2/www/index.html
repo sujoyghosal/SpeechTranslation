@@ -187,7 +187,7 @@
 
 <body>
 
-  <div ng-controller="DonationCtrl" ng-show="isVisible()">
+  <div ng-controller="ChatCtrl" ng-show="isVisible()">
     <header>
       <nav class="navbar navbar-default">
         <div class="container-fluid">
@@ -217,38 +217,6 @@
                                 </ul>
                             </li>-->
               <li class="dropdown">
-                <a href="#" style="color: green" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-cart-plus fa-2x"></i>Needs</a>
-                <ul class="dropdown-menu">
-                  <li><a href="#createneed" style="color: green">Create Needs</a></li>
-                  <li><a href="#viewneeds" style="color: green">View All Needs</a></li>
-                  <li><a href="#myneeds" style="color: green">View My Needs</a></li>
-                </ul>
-              </li>
-              <li class="dropdown">
-                <a href="#" style="color: green" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-gift fa-2x"></i>Offers</a>
-                <ul class="dropdown-menu">
-                  <li><a href="#offerdonation" style="color: green">Create Offer</a></li>
-                  <li><a href="#getdonation" style="color: green">View Offers</a></li>
-                  <li><a href="#offershistory" style="color: green">My Offers</a></li>
-                </ul>
-              </li>
-              <li class="dropdown">
-                <a href="#" style="color: green" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                  <span class="fa-layers fa-fw" style="background:MistyRose">
-                    <i class="fa-solid fa-envelope fa-2x"></i>
-                    <span class="fa-layers-counter" style="color: red"> <b>{{eventsCount}}</b></span>
-                  </span>Events
-                </a>
-                <ul class=" dropdown-menu">
-                  <li><a href="#subscribe" style="color: green">Subscribe Events</a></li>
-                  <li><a href="#notifications" style="color: green">Events of My Interest</a></li>
-                  <li><a href="#eventsnearby" style="color: green">Events Nearby</a></li>
-                </ul>
-              </li>
-              <li class="dropdown">
-                <a href="#contactus" style="color: green"><i class="fa fa-envelope fa-2x"></i>Contact Us</a>
-              </li>
-              <li class="dropdown">
                 <a href="#" style="color: green" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa-solid fa-user fa-2x"></i>{{username}}</a>
                 <ul class="dropdown-menu">
                   <li><a href="#getdonation" style="color: green">My Profile</a></li>
@@ -273,7 +241,7 @@
     </header>
   </div>
   <center>
-    <div ng-controller="DonationCtrl " class="container ">
+    <div ng-controller="ChatCtrl " class="container ">
       <div class="col-md-9 ">
         <div ng-view></div>
       </div>
