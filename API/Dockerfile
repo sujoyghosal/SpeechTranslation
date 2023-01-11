@@ -4,4 +4,4 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 EXPOSE 5555
-CMD ["node", "speech_translation.js"]
+CMD ["node", "speech-translation.js"]

@@ -24,50 +24,42 @@ const translate = new Translate();
 // const text = 'The text to translate, e.g. Hello, world!';
 //const target = "hi";
 
-async function translateText(obj, target) {
+async function translateText(text, target) {
   // Translates the text into the target language. "text" can be a string for
   // translating a single piece of text, or an array of strings for translating
   // multiple texts.
-  if (!obj || obj == null) {
-    return;
-  }
-  console.log("translateText: received obj " + JSON.stringify(obj));
-  let [translations] = await translate.translate(obj.text, target);
+  let [translations] = await translate.translate(text, target);
   translations = Array.isArray(translations) ? translations : [translations];
   console.log("Translations:");
   translations.forEach((translation, i) => {
-    console.log(`${obj.text[i]} => (${target}) ${translation}`);
+    console.log(`${text[i]} => (${target}) ${translation}`);
     console.log("Translated text: " + translations);
-    io.sockets.in(obj.target.email).emit("event", {
-      lang: target,
-      text: translations,
-      sourceSpeaker: obj.source,
-    });
+    mysocket.emit("event", { lang: target, text: translations });
   });
 }
 
-//translateText();
+translateText();
 // Global error handling
 app.use(function (err, _req, res, next) {
   console.error(err.stack);
   res.status(500).send("Something broke!");
 });
-
-let dbConnection;
-
-const { MongoClient, ServerApiVersion } = require("mongodb");
-const uri =
-  "mongodb+srv://sujoy:Joyita16@cluster0.gnsesmw.mongodb.net/?retryWrites=true&w=majority";
-const client = new MongoClient(uri, {
+const { MongoClient } = require("mongodb");
+const connectionString =
+  process.env.ATLAS_URI ||
+  "mongodb+srv://sujoy:Delhi123@cluster0.omxq6.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+const client = new MongoClient(connectionString, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  serverApi: ServerApiVersion.v1,
 });
-client.connect((err) => {
-  dbConnection = client.db("ChatDB");
-  // perform actions on the collection object
-  console.log("Successfully connected to MongoDB - ChatDB");
-  //client.close();
+
+let dbConnection;
+client.connect(function (err, db) {
+  if (err || !db) {
+    return err;
+  }
+  dbConnection = db.db("DonationDB");
+  console.log("Successfully connected to MongoDB - DonationsDB");
 });
 
 app.get("/", (req, res) => {
@@ -101,8 +93,8 @@ app.get("/login", (req, res) => {
     .limit(1)
     .toArray(function (err, result) {
       if (err) {
-        res.status(400).send("Error fetching user - " + err);
-        console.log("Failed login for " + req.query.email + ": " + err);
+        res.status(400).send("Error fetching user");
+        console.log("Failed login for " + req.query.email);
       } else {
         //res.json(result);
         console.log("Login response: " + JSON.stringify(result));
@@ -113,25 +105,22 @@ app.get("/login", (req, res) => {
         ) {
           res.status(200).jsonp(result[0]);
           console.log("Success login for " + req.query.email);
-          var newUser = result[0];
-          var found = false;
+          var userCount = 0;
           for (i = 0; i < loggedinUsers.length; i++) {
-            if (loggedinUsers[i].email == newUser.email) {
-              found = true;
-              break;
+            if (loggedinUsers[0].email !== req.query.email) {
+              continue;
             }
+            userCount++;
           }
-          if (!found) {
-            console.log(
-              "New User has logged in, refreshing users list with " +
-                newUser.name
-            );
-            loggedinUsers.push(newUser);
+          console.log(
+            "UserCount = " +
+              userCount +
+              ", loggedInUsers length = " +
+              loggedinUsers.length
+          );
+          if (userCount == 0 || loggedinUsers.length == 0) {
+            loggedinUsers.push(result[0]);
           }
-          //broadcast event to all loggedin users
-          io.emit("new-loggedin-user", {
-            newUser: result[0],
-          });
         } else {
           res.status(400).send([]);
           console.log("Failed login for " + req.query.email);
@@ -342,7 +331,6 @@ app.post("/setLang", (req, res) => {
     console.log("setLang: inadequate params.");
     return;
   }
-  console.log("Received setLang request: " + JSON.stringify(req.body));
   for (i = 0; i < loggedinUsers.length; i++) {
     if (loggedinUsers[i].email == email) {
       console.log(
@@ -359,9 +347,8 @@ app.post("/setLang", (req, res) => {
       break;
     }
   }
-  res.send(200);
 });
-//getEvents by email
+//getDonations by email
 app.get("/eventsbyemailandtype", (req, res) => {
   dbConnection
     .collection("Events")
@@ -380,7 +367,7 @@ app.get("/eventsbyemailandtype", (req, res) => {
             ", error " +
             err
         );
-        res.status(400).send("Error fetching Events!" + err);
+        res.status(400).send("Error fetching donations!" + err);
       } else {
         //res.json(result);
         if (result && result.length > 0) {
@@ -391,19 +378,19 @@ app.get("/eventsbyemailandtype", (req, res) => {
           );
         } else {
           res.status(200).send([]);
-          console.log("No Events for " + req.query.email);
+          console.log("No donations for " + req.query.email);
         }
       }
     });
 });
-//Create Event
-app.post("/events/insert", (req, res) => {
+//Create Donation
+app.post("/donations/insert", (req, res) => {
   var channel =
     "DONATE-" +
     req.body.city.toString().toUpperCase() +
     "-" +
     req.body.itemtype.toString().toUpperCase();
-  const eventDocument = {
+  const donationDocument = {
     email: req.body.email,
     postedby: req.body.postedby,
     time_created: Date().toString(),
@@ -416,7 +403,7 @@ app.post("/events/insert", (req, res) => {
     fa_icon: req.body.fa_icon,
     event_type: "DONATE",
   };
-  createEvent(eventDocument, req, res);
+  createEvent(donationDocument, req, res);
 });
 
 //Donation Events
@@ -625,6 +612,39 @@ app.post("/fetchevents", (req, res) => {
           res.status(200).jsonp(result);
         } else {
           res.status(404).send("No Events");
+          console.log("No events");
+        }
+      }
+    });
+});
+//Nearby Events by event type ie NEED or DONATION
+app.get("/fetchnearbyevents", (req, res) => {
+  dbConnection
+    .collection("Events")
+    .find({
+      location: {
+        $near: {
+          $geometry: {
+            type: "Point",
+            coordinates: [Number(req.query.lng), Number(req.query.lat)],
+          },
+          $maxDistance: Number(req.query.max_distance),
+        },
+      },
+      event_type: req.query.type,
+    })
+    .limit(20)
+    .toArray(function (err, result) {
+      if (err) {
+        console.log("Failed to fetch event  " + err);
+        res.status(404).send("No Events Found");
+      } else {
+        //res.json(result);
+        if (result && result.length > 0) {
+          res.status(200).send(result);
+          console.log("Success fetching nearby events ");
+        } else {
+          res.jsonp([]);
           console.log("No events");
         }
       }
@@ -848,10 +868,15 @@ io.on("connection", function (socket) {
   mysocket = socket;
   console.log("a user connected");
   mysocket.emit("event", { lang: "en-US", text: "Today is a beautiful day" });
-  socket.on("create-room", function (room) {
-    if (room) {
-      socket.join(room.channel);
-      console.log("Joined client socket to room " + room.channel);
+  socket.on("create-room", function (rooms) {
+    if (rooms) {
+      var channels = rooms.channels;
+      if (channels && channels.length > 0) {
+        for (i = 0; i < channels.length; i++) {
+          socket.join(channels[i]);
+          console.log("Joined client socket to room " + channels[i]);
+        }
+      }
     }
   });
   socket.on("send-login", function (userInfo) {
@@ -860,31 +885,13 @@ io.on("connection", function (socket) {
     });
   });
   socket.on("leave", function (room) {
-    console.log("#####Disconecting client socket from room " + room.channel);
-    socket.leave(room.channel);
+    console.log("#####Disconecting client socket from room " + room);
+    socket.leave(room);
   });
   socket.on("speech", function (speech) {
-    var targetLang = "th";
+    //const target = "th";
     console.log(JSON.stringify(speech));
-    for (i = 0; i < loggedinUsers.length; i++) {
-      if (loggedinUsers[i].email == speech.target.email) {
-        console.log("Found email match for target in speech event");
-        targetLang = loggedinUsers[i].preferred_lang;
-        break;
-      }
-    }
-    try {
-      if (targetLang && targetLang.length > 1)
-        //translateText(speech.text, targetLang, speech.target.email);
-        translateText(speech, targetLang);
-      else {
-        console.log("No preferred targetLang found, resorting to default Thai");
-        //translateText(speech.text, "th", speech.target.email);
-        translateText(speech, "th");
-      }
-    } catch (err) {
-      console.log("TranslateTExt error " + err);
-    }
+    translateText(speech.text, speech.target);
   });
 });
 
