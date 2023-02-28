@@ -256,7 +256,7 @@ var BASEURL_PERSONAL = "https://freecycleapi.mybluemix.net";
 var BASEURL_GCP = "https://donation-demo-api-vq2uax3u4q-em.a.run.app";
 var BASEURL_OS = "https://speech-translation-api-concession-kiosk.pcf-to-ocp-migration-c6c44da74def18a795b07cc32856e138-0000.us-south.containers.appdomain.cloud";
 
-var BASEURL = BASEURL_OS;
+var BASEURL = BASEURL_LOCAL;
 var socket = null;
 var GEOCODEURL =
   "https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyAwQOPx91fjj06kDNq7hjkT-ZSxkQFtJPA";
