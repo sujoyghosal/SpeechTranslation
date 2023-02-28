@@ -124,7 +124,7 @@ app.get("/login", (req, res) => {
           if (!found) {
             console.log(
               "New User has logged in, refreshing users list with " +
-                newUser.name
+              newUser.name
             );
             loggedinUsers.push(newUser);
           }
@@ -347,9 +347,9 @@ app.post("/setLang", (req, res) => {
     if (loggedinUsers[i].email == email) {
       console.log(
         "Found a logged in user with email " +
-          email +
-          ", setting lang to " +
-          lang
+        email +
+        ", setting lang to " +
+        lang
       );
       loggedinUsers[i].preferred_lang = lang;
       console.log(
@@ -376,9 +376,9 @@ app.get("/eventsbyemailandtype", (req, res) => {
       if (err) {
         console.log(
           "eventsbyemailandtype - Failed to fetch events for " +
-            req.query.email +
-            ", error " +
-            err
+          req.query.email +
+          ", error " +
+          err
         );
         res.status(400).send("Error fetching Events!" + err);
       } else {
@@ -387,7 +387,7 @@ app.get("/eventsbyemailandtype", (req, res) => {
           res.status(200).jsonp(result);
           console.log(
             "eventsbyemailandtype - Success fetching events for " +
-              req.query.email
+            req.query.email
           );
         } else {
           res.status(200).send([]);
@@ -436,10 +436,10 @@ app.get("/donation-events", (req, res) => {
       if (err) {
         console.log(
           "Failed to fetch donation events for " +
-            req.query.city +
-            req.query.itemtype +
-            ", error " +
-            err
+          req.query.city +
+          req.query.itemtype +
+          ", error " +
+          err
         );
         res.status(400).send("Error fetching donations!" + err);
       } else {
@@ -687,7 +687,7 @@ function sendEventToNearbySubscribedUsers(lng, lat, max_dist, event) {
           res.status(200).send(result);
           console.log(
             "fetchmynearbyevents: Success fetching nearby users subscribed to location events. " +
-              JSON.stringify(result)
+            JSON.stringify(result)
           );
         } else {
           res.jsonp([]);
@@ -823,6 +823,7 @@ var whitelist = [
   "https://donation-web-vq2uax3u4q-el.a.run.app",
   "http://localhost:3000",
   "http://159.122.177.104:31363",
+  "https://speech-translation-web-concession-kiosk.pcf-to-ocp-migration-c6c44da74def18a795b07cc32856e138-0000.us-south.containers.appdomain.cloud"
 ];
 app.use(
   cors({
