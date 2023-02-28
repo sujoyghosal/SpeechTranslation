@@ -254,9 +254,9 @@ var BASEURL_DOCKER = "http://localhost:49155";
 var BASEURL_PIVOTAL = "http://freecycleapissujoy-horned-erasure.cfapps.io";
 var BASEURL_PERSONAL = "https://freecycleapi.mybluemix.net";
 var BASEURL_GCP = "https://donation-demo-api-vq2uax3u4q-em.a.run.app";
-var BASEURL_IBM = "http://159.122.177.104:31072";
+var BASEURL_OS = "https://speech-translation-api-concession-kiosk.pcf-to-ocp-migration-c6c44da74def18a795b07cc32856e138-0000.us-south.containers.appdomain.cloud";
 
-var BASEURL = BASEURL_DOCKER;
+var BASEURL = BASEURL_OS;
 var socket = null;
 var GEOCODEURL =
   "https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyAwQOPx91fjj06kDNq7hjkT-ZSxkQFtJPA";
@@ -342,7 +342,7 @@ app.controller(
     $scope.maxDate = {
       value: new Date(2015, 12, 31, 14, 57),
     };
-    $scope.isMobileDevice = function () {};
+    $scope.isMobileDevice = function () { };
     $rootSocket = null;
     $scope.isVisible = function () {
       /*return ("/login" !== $location.path() && "/signup" !== $location.path() &&
@@ -810,8 +810,8 @@ app.controller(
           if ($scope.data[key])
             selectedTypes.push(
               key.toString().toUpperCase().replace("_", "-") +
-                "-" +
-                $scope.city.toString().trim().toUpperCase()
+              "-" +
+              $scope.city.toString().trim().toUpperCase()
             );
         }
         console.log("Selected Types: " + JSON.stringify(selectedTypes));
@@ -964,15 +964,15 @@ app.controller(
             if (!checkIfPushAllowedNow(obj.settings)) {
               console.log(
                 "SendPushToUser: Prevented push as filtered by settings opitions. " +
-                  ":" +
-                  JSON.stringify(response.data.settings)
+                ":" +
+                JSON.stringify(response.data.settings)
               );
               return;
             } else {
               console.log(
                 "SendPushToUser: Sending Push as filtered by settings opitions. " +
-                  ":" +
-                  JSON.stringify(response.data.settings)
+                ":" +
+                JSON.stringify(response.data.settings)
               );
               SendPushToUser(obj.uuid, text);
             }
@@ -1055,17 +1055,17 @@ app.controller(
           if (!checkIfPushAllowedNow(response.data.settings)) {
             console.log(
               "SendPushToUser: Prevented push as filtered by settings opitions. " +
-                uuid +
-                ":" +
-                JSON.stringify(response.data.settings)
+              uuid +
+              ":" +
+              JSON.stringify(response.data.settings)
             );
             return;
           } else {
             console.log(
               "SendPushToUser: Sending Push as filtered by settings opitions. " +
-                uuid +
-                ":" +
-                JSON.stringify(response.data.settings)
+              uuid +
+              ":" +
+              JSON.stringify(response.data.settings)
             );
           }
 
